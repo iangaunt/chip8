@@ -10,7 +10,7 @@ using std::endl;
 int main(int argv, char** args) {
 	chip8* c8 = new chip8();
 	c8->setup_graphics();
-	c8->load_rom("C:/Users/ianga/Desktop/Codespaces/chip8/src/roms/test_opcode.ch8");
+	c8->load_rom("C:/Users/ianga/Desktop/Codespaces/chip8/src/roms/pong.ch8");
 
 	bool quit = false;
 	int count = 0;

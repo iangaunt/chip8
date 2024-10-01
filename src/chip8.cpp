@@ -42,7 +42,7 @@ chip8::chip8() {
 }
 
 short chip8::fetch_opcode(int addr) {
-	return memory[addr] << 8u | memory[addr + 1];
+	return memory[addr] << 8 | memory[addr + 1];
 }
 
 void chip8::load_rom(const char* rom) {
@@ -89,6 +89,7 @@ void chip8::update_graphics(const void* buffer, int pitch) {
 	for (int i = 0; i < 2048; ++i) {
 		unsigned int pixel = gfx[i];
 		pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
+		pixels[i] = (pixels[i] == 0xFF000000 ? 0xFFB7C4A3 : 0x1E211A);
 	}
 
 	SDL_UpdateTexture(texture, nullptr, pixels, 64 * sizeof(unsigned int));
@@ -176,75 +177,68 @@ void chip8::emulate_cycle() {
 	prog_counter += 2;
 	draw_flag = false;
 
-	switch (opcode & 0xF000u) {
+	switch (opcode & 0xF000) {
 		case 0x1000: {
-			prog_counter = opcode & 0x0FFFu;
-
+			prog_counter = opcode & 0x0FFF;
 			break;
 		}
 
 		case 0x2000: {
 			stack[stack_pointer] = prog_counter;
 			++stack_pointer;
-			prog_counter = opcode & 0x0FFFu;
-
+			prog_counter = opcode & 0x0FFF;
 			break;
 		}
 
 		case 0x3000: {
-			int x = (opcode & 0x0F00u) >> 8u;
-			int nn = opcode & 0x00FFu;
+			int x = (opcode & 0x0F00) >> 8;
+			int nn = opcode & 0x00FF;
 
 			if (v[x] == nn) {
                 prog_counter += 2;
             }
-			
             break;
 		}
 
 		case 0x4000: {	
-			int x = (opcode & 0x0F00u) >> 8u;
-			int nn = opcode & 0x00FFu;
+			int x = (opcode & 0x0F00) >> 8;
+			int nn = opcode & 0x00FF;
 
 			if (v[x] != nn) {
                 prog_counter += 2;
             }
-
             break;
 		}
 
 		case 0x5000: {
-			int x = (opcode & 0x0F00u) >> 8u;
-			int y = (opcode & 0x00F0u) >> 4u;
+			int x = (opcode & 0x0F00) >> 8;
+			int y = (opcode & 0x00F0) >> 4;
 
 			if (v[x] == v[y]) {
 				prog_counter += 2;
             }
-
             break;
 		}
 
 		case 0x6000:{
-			int x = (opcode & 0x0F00u) >> 8u;
-			int nn = opcode & 0x00FFu;
+			int x = (opcode & 0x0F00) >> 8;
+			int nn = opcode & 0x00FF;
 			v[x] = nn;
-
 			break;
 		}
 
 		case 0x7000: {
-			int x = (opcode & 0x0F00u) >> 8u;
-			int nn = opcode & 0x00FFu;
+			int x = (opcode & 0x0F00) >> 8;
+			int nn = opcode & 0x00FF;
 			v[x] += nn;
-
 			break;
 		}
 
 		case 0x8000: {
-			int x = (opcode & 0x0F00u) >> 8u;
-			int y = (opcode & 0x00F0u) >> 4u;
+			int x = (opcode & 0x0F00) >> 8;
+			int y = (opcode & 0x00F0) >> 4;
 
-			switch (opcode & 0x000Fu) {
+			switch (opcode & 0x000F) {
 				case 0x0: {
 					v[x] = v[y];
 					break;
@@ -268,35 +262,33 @@ void chip8::emulate_cycle() {
 				case 0x4: {
 					int sum = v[x] + v[y];
 					
-					v[0xFu] = (sum > 255u ? 1 : 0);
-					v[x] = sum & 0xFFu;
+					v[0xF] = (sum > 255 ? 1 : 0);
+					v[x] = sum & 0xFF;
 					break;
 				}
 
 				case 0x5: {
-					v[0xFu] = (v[x] > v[y] ? 1 : 0);
+					v[0xF] = (v[x] > v[y] ? 1 : 0);
 					v[x] -= v[y];
-
 					break;
 				}
 
 				case 0x6: {
-					v[0xFu] = v[x] & 0x1u;
+					v[0xF] = v[x] & 0x1u;
 					v[x] >>= 1u;
-
 					break;
 				}
 
 				case 0x7: {
-					v[0xFu] = (v[y] > v[x] ? 1 : 0);
+					v[0xF] = (v[y] > v[x] ? 1 : 0);
 					v[x] = v[y] - v[x];
-
 					break;
 				}
 
 				case 0xE: {
-					v[0xFu] = (v[x] & 0x80) >> 7u;
+					v[0xF] = (v[x] & 0x80) >> 7u;
 					v[x] <<= 1;
+					break;
 				}
 			}
 
@@ -304,8 +296,8 @@ void chip8::emulate_cycle() {
 		}
 		
 		case 0x9000: {
-			int x = (opcode & 0x0F00u) >> 8u;
-			int y = (opcode & 0x00F0u) >> 4u;
+			int x = (opcode & 0x0F00) >> 8;
+			int y = (opcode & 0x00F0) >> 4;
 
 			if (v[x] != v[y]) {
 				prog_counter += 2;
@@ -314,36 +306,36 @@ void chip8::emulate_cycle() {
 		}
 
 		case 0xA000: {
-			ind = opcode & 0x0FFFu;
+			ind = opcode & 0x0FFF;
 			break;
 		}
 		
 		case 0xB000: {
-			prog_counter = v[0] + (opcode & 0x0FFFu);
+			prog_counter = v[0] + (opcode & 0x0FFF);
 			break;
 		}
 
 		case 0xC000: {
-			int x = (opcode & 0x0F00u) >> 8u;
-            int nn = opcode & 0x00FFu;
+			int x = (opcode & 0x0F00) >> 8;
+            int nn = opcode & 0x00FF;
 
             v[x] = rand() % 256 & nn;
             break;
 		}
 
 		case 0xD000: {
-			unsigned short x = v[(opcode & 0x0F00u) >> 8u] % 640;
-			unsigned short y = v[(opcode & 0x00F0u) >> 4u] % 320;
+			unsigned short x = v[(opcode & 0x0F00) >> 8] % 640;
+			unsigned short y = v[(opcode & 0x00F0) >> 4] % 320;
 
-			unsigned short spr_height = opcode & 0x000Fu;
+			unsigned short spr_height = opcode & 0x000F;
 
-			v[0xFu] = 0;
+			v[0xF] = 0;
 
 			for (int height = 0; height < spr_height; ++height) {
 				unsigned short spr = memory[ind + height];
 				
 				for (int width = 0; width < 8; ++width) {
-					unsigned short spr_pix = spr & (0x80u >> width);
+					unsigned short spr_pix = spr & (0x80 >> width);
 					unsigned short scr_pix = gfx[(y + height) * 64 + x + width];
 
 					if (spr_pix) {
@@ -359,22 +351,17 @@ void chip8::emulate_cycle() {
 		}
 
 		case 0xE000: {
-			switch (opcode & 0x00F0u >> 4) {
-				case 0x9: {
-					int x = (opcode & 0x0F00u) >> 8u;
-					if (keypad[v[x]] == 1) {
-						prog_counter += 2;
-					}
+			int x = (opcode & 0x0F00) >> 8;
+			int key = static_cast<int>(v[x]);
 
+			switch (opcode & 0x00F0) {
+				case 0x90: {
+					if (keypad[key] == 1) prog_counter += 2;
 					break;
 				}
 
-				case 0xA: {
-					int x = (opcode & 0x0F00u) >> 8u;
-					if (keypad[v[x]] == 0) {
-						prog_counter += 2;
-					}
-
+				case 0xA0: {
+					if (keypad[key] == 0) prog_counter += 2;
 					break;
 				}
 			}
@@ -383,9 +370,9 @@ void chip8::emulate_cycle() {
 		}
 
 		case 0xF000: {
-			int x = (opcode & 0x0F00u) >> 8u;
+			int x = (opcode & 0x0F00) >> 8;
 
-			switch (opcode & 0x00FFu) {
+			switch (opcode & 0x00FF) {
 				case 0x07: {
 					v[x] = delay_timer;
 					break;
@@ -430,7 +417,7 @@ void chip8::emulate_cycle() {
 
 				case 0x29: {
 					char digit = v[x];
-					ind = 0x50u + (5 * digit);
+					ind = 0x50 + (5 * digit);
 
 					break;
 				}
@@ -480,8 +467,8 @@ void chip8::emulate_cycle() {
 		--stack_pointer;
 		prog_counter = stack[stack_pointer];
 
-	} else if (opcode & 0xF000u == 0x0000) {
-		ind = opcode & 0x0FFFu;
+	} else if (opcode & 0xF000 == 0x0000) {
+		ind = opcode & 0x0FFF;
 
 	}
 
