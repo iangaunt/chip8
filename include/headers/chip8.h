@@ -1,12 +1,12 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-
+#include <SDL2/SDL.h>
 class chip8 {
     public: 
+        bool running = true;
+        bool draw_flag = false;
+        
         unsigned short opcode;
         unsigned char memory[4096]; 
         unsigned char v[16]; // Registers (V0 - VE)
@@ -14,7 +14,7 @@ class chip8 {
         unsigned short ind;
         unsigned short prog_counter;
 
-        unsigned char gfx[64 * 32];
+        unsigned int gfx[64 * 32];
 
         unsigned char delay_timer;
         unsigned char sound_timer;
@@ -22,7 +22,7 @@ class chip8 {
         unsigned short stack[16];
         unsigned short stack_pointer;
 
-        unsigned char keypad[16];
+        unsigned int keypad[16];
 
         unsigned char fontset[80] = {
             0xF0, 0x90, 0x90, 0x90, 0xF0, 
@@ -43,8 +43,11 @@ class chip8 {
             0xF0, 0x80, 0xF0, 0x80, 0x80  
         };
 
-        GLFWwindow* window;
-        int window_size_modifier = 30;
+        SDL_Window* window;
+        SDL_Renderer* renderer;
+        SDL_Texture* texture;
+
+        int window_size_modifier = 10;
 
         chip8();
 
@@ -52,9 +55,13 @@ class chip8 {
         
         void load_rom(const char* filename);
         void setup_graphics();
-        void print_board();
 
         void emulate_cycle();
+        void update_graphics(void const* buffer, int pitch);
+        bool fetch_input();
+
+        void end_graphics();
+
 };
 
 #endif

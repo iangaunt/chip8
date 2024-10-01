@@ -14,9 +14,11 @@
 
                 "${workspaceFolder}/src/main.cpp",
                 "${workspaceFolder}/src/chip8.cpp",
-                "${workspaceFolder}/src/glad.c",
 
-                "-lglfw3dll",
+                "-lmingw32",
+                "-lSDL2main",
+                "-lSDL2",
+
                 "-o",
                 "${workspaceFolder}/app.exe"
             ],

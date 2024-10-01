@@ -1,1 +1,4 @@
+./include/SDL2
+lib
 app.exe
+SDL2.dll
