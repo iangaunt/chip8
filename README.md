@@ -2,4 +2,4 @@
 
 A basic emulator for running chip8 roms.
 
-Currently working on finishing the CPU and then will start working on graphics.
+The only thing that is buggy is user input, but I can't be bothered right now.
