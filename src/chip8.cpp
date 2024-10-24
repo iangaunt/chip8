@@ -13,6 +13,10 @@ using std::ios_base;
 using std::ifstream;
 using std::string;
 
+const unsigned int ON = 0x1E211A;
+const unsigned int STASIS = 0x8F9E77;
+const unsigned int OFF = 0xFFB7C4A3;
+
 chip8::chip8() {
 	prog_counter = 0x200;
     ind = 0;
@@ -89,7 +93,15 @@ void chip8::update_graphics(const void* buffer, int pitch) {
 	for (int i = 0; i < 2048; ++i) {
 		unsigned int pixel = gfx[i];
 		pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
-		pixels[i] = (pixels[i] == 0xFF000000 ? 0xFFB7C4A3 : 0x1E211A);
+
+		pixels[i] = (pixels[i] == 0xFF000000 ? OFF : ON);
+
+		if (pixels[i] == ON) blinker[i] = 4;
+
+		if (pixels[i] == OFF && blinker[i] > 0) {
+			pixels[i] = STASIS;
+			blinker[i] -= 1;
+		}
 	}
 
 	SDL_UpdateTexture(texture, nullptr, pixels, 64 * sizeof(unsigned int));

@@ -16,6 +16,8 @@ class chip8 {
 
         unsigned int gfx[64 * 32];
 
+        unsigned int blinker[2048];
+
         unsigned char delay_timer;
         unsigned char sound_timer;
 
